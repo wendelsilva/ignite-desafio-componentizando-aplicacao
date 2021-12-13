@@ -3,52 +3,29 @@ import { useState, useEffect } from "react";
 
 import '../styles/sidebar.scss';
 
-import { api } from '../services/api';
+import { api } from "../services/api";
+
+interface SideBarProps {
+  onClickInGenreButton: (id: number) => void;
+  selectedGenreId: number;
+}
 interface GenreResponseProps {
   id: number;
   name: 'action' | 'comedy' | 'documentary' | 'drama' | 'horror' | 'family';
   title: string;
 }
-interface MovieProps {
-  imdbID: string;
-  Title: string;
-  Poster: string;
-  Ratings: Array<{
-    Source: string;
-    Value: string;
-  }>;
-  Runtime: string;
-}
 
-
-export function SideBar() {
+export function SideBar(props: SideBarProps) {
   // Complete aqui
-  const [selectedGenreId, setSelectedGenreId] = useState(1);
-
   const [genres, setGenres] = useState<GenreResponseProps[]>([]);
 
-  const [movies, setMovies] = useState<MovieProps[]>([]);
-  const [selectedGenre, setSelectedGenre] = useState<GenreResponseProps>({} as GenreResponseProps);
-
   useEffect(() => {
-    api.get<GenreResponseProps[]>('genres').then(response => {
+    // Trazer todos os generos
+    api.get<GenreResponseProps[]>('genres')
+    .then(response => {
       setGenres(response.data);
     });
   }, []);
-
-  useEffect(() => {
-    api.get<MovieProps[]>(`movies/?Genre_id=${selectedGenreId}`).then(response => {
-      setMovies(response.data);
-    });
-
-    api.get<GenreResponseProps>(`genres/${selectedGenreId}`).then(response => {
-      setSelectedGenre(response.data);
-    })
-  }, [selectedGenreId]);
-
-  function handleClickButton(id: number) {
-    setSelectedGenreId(id);
-  }
 
   return (
     <nav className="sidebar">
@@ -60,8 +37,8 @@ export function SideBar() {
               key={String(genre.id)}
               title={genre.title}
               iconName={genre.name}
-              onClick={() => handleClickButton(genre.id)}
-              selected={selectedGenreId === genre.id}
+              onClick={() => props.onClickInGenreButton(genre.id)}
+              selected={props.selectedGenreId === genre.id}
             />
           ))}
         </div>
